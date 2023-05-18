@@ -1,6 +1,6 @@
-import './globals.css'
+import './../globals.css'
 import { Inter } from 'next/font/google'
-import NavBar from '../components/navbar'
+import NavBar from '@/components/navbar'
 import { MdHome } from "react-icons/md";
 import { MdFormatListBulleted } from "react-icons/md";
 import Link from 'next/link';
@@ -12,7 +12,7 @@ export const metadata = {
   description: 'SWALLOW IT',
 }
 
-export default function RootLayout({ children }) {
+export default function EvaluateLayout({ children }) {
   
   return (
     <html lang="en">
@@ -29,23 +29,24 @@ export default function RootLayout({ children }) {
             </div>
             <div className='flex flex-row justify-center'>
 
+          
+
                 <div className="top-16 hidden p-2 lg:block fixed flex flex-col w-64 h-full bg-slate-700 border-r-xl border-stone-700 text-center text-3xl text-white left-0">
                     
-                    <div className='flex flex-row p-3 rounded-2xl justify-center mb-1 items-center hover:bg-menuvar-300 mx-5 transition-all'>
+                    <div className='flex flex-row p-3 rounded-2xl justify-center items-center hover:bg-menuvar-300 mb-1 mx-5 transition-all'>
                         <MdHome/>
                         <h2 className=''><Link href='/auth'> Auth</Link></h2>
                     </div>
 
 
-                    <div className='flex flex-row rounded-2xl justify-center p-3 items-center hover:bg-menuvar-300 mx-5 transition-all'>
+                    <div className='flex flex-row rounded-2xl justify-center p-3 items-center bg-menuvar-300 mx-5 transition-all'>
                         <MdFormatListBulleted/>
                         <h2 className=''><Link href="/evaluate"> Evaluate</Link></h2>
                     </div>
-                   
+                    
+                
 
                 </div>
-
-               
                 
                 
 
@@ -72,7 +73,7 @@ export default function RootLayout({ children }) {
                     
                 </div>
 
-                <NavBar active={null} className="lg:hidden"/>
+                <NavBar active={"evaluate"} className="lg:hidden"/>
         </div>
       </body>
     </html>
