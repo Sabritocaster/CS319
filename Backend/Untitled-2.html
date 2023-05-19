@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang = eng>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE-edge">
+    <meta name = "viewpoint" content="width=device-width, initial-scale=1.0">
+    <title>AMK</title>
+
+</head>
+<body>
+    <div id = "authform">
+        <h2>Sign Up or Sign In</h2>
+        <input type = "email" placeholder="email" id="UserEmail" >
+        <input type = "password" placeholder="password" id="UserPassword"> <br> <br>
+        <button id="signUpButton"> Sign Up</button>
+        <button id="signInButton"> Sign In</button>
+        <button id="signOutButton"> Sign Out</button>
+    </div>
+
+    <div id="SecretContent"></div>
+
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics.js";
+        import{
+            getAuth,
+            createUserWithEmailAndPassword,
+            signInWithEmailAndPassword,
+            onAuthStateChanged,
+            signOut
+        }from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
+      
+        // Your web app's Firebase configuration
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+          apiKey: "AIzaSyDkSjzHteXcXdIB2alglgcdE4rvYP1o2y0",
+          authDomain: "deneme-5b791.firebaseapp.com",
+          projectId: "deneme-5b791",
+          storageBucket: "deneme-5b791.appspot.com",
+          messagingSenderId: "78415815091",
+          appId: "1:78415815091:web:f79e97d9707494d6c36bc6",
+          measurementId: "G-J2HS41WZ7X"
+        };
+      
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const auth = getAuth(app);
+
+        const UserEmail = document.querySelector("#UserEmail");
+        const UserPassword = document.querySelector("#UserPassword");
+        const authForm = document.querySelector("#authForm");
+        const SecretContent = document.querySelector("#SecretContent");
+        const signUpButton = document.querySelector("#signUpButton");
+        const signInButton = document.querySelector("#signInButton");
+        const signOutButton = document.querySelector("#signOutButton");
+
+        const userSignUp = async() => {
+            const signUpEmail = UserEmail.value;
+            const signUpPassword = UserPassword.value;
+            createUserWithEmailAndPassword(auth, signUpEmail, signUpPassword)
+            .then((UserCredential)=>{
+                const user = UserCredential.user;
+                console.log(user);
+                alert("Account created");
+            })
+            .catch((error)=>{
+                const errorCode = error.code;
+                const errorMessage = error.message;
+                console.log(errorCode + errorMessage);
+            })
+        }
+
+        const userSignIn = async() => {
+            const signInEmail = UserEmail.value;
+            const signInPassword = UserPassword.value;
+            signInWithEmailAndPassword(auth, signInEmail, signInPassword)
+            .then((UserCredential)=>{
+                const user = UserCredential.user;
+                console.log(user);
+                alert("Signed in");
+            })
+            .catch((error)=>{
+                const errorCode = error.code;
+                const errorMessage = error.message;
+                console.log(errorCode + errorMessage);
+            })
+        }
+
+        const userSignOut = async() => {
+            await signOut(auth);
+            alert("Signed out");
+        }
+        
+        signUpButton.addEventListener('click', userSignUp);
+        signInButton.addEventListener('click', userSignIn);
+        signOutButton.addEventListener('click', userSignOut);
+
+      </script>
+
+</body>
+
+</html>
