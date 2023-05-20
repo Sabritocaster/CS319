@@ -1,6 +1,6 @@
-import './globals.css'
+import './../globals.css'
 import { Inter } from 'next/font/google'
-import NavBar from '../components/navbar'
+import NavBar from '/components/navbar'
 import { MdAccountCircle } from "react-icons/md";
 import { MdFormatListBulleted } from "react-icons/md";
 import Link from 'next/link';
@@ -34,7 +34,7 @@ export default function RootLayout({ children }) {
                         <h2 className=''><Link href='/documents'> Documents</Link></h2>
                     </div>
 
-                    <div className='flex flex-row rounded-2xl justify-center p-3 items-center hover:bg-menuvar-300 mx-5 transition-all'>
+                    <div className='flex flex-row rounded-2xl justify-center p-3 items-center bg-menuvar-300 mx-5 transition-all'>
                         <MdAccountCircle/>
                         <h2 className=''><Link href="/profile"> Profile</Link></h2>
                     </div>

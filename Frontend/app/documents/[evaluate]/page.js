@@ -1,10 +1,10 @@
 'use client';
 
-export default function Evaluate() {
+export default function Evaluate({params}) {
     return (
       <>
       <div className="m-10 mb-0">
-            <p>Student Name:</p>
+            <p>Student Name:{params.evaluate}</p>
             <p>Company Name:</p>
         </div>
       <div className="flex flex-col lg:flex-row-reverse"> 

@@ -17,9 +17,7 @@ export default function AuthLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <div className='xl:hidden fixed flex px-4 py-1  items-center bottom-16 right-8 z-50 bg-menuvar-500 rounded-xl text-white drop-shadow-2xl'>
-                
-            </div>
+       
             <div className='flex bg-slate-700 h-16 fixed w-screen text-4xl text-white justify-center items-center z-50 lg:pl-16 lg:justify-between'>
                 
                 <h1 className='hidden lg:block'><Link href='/'>CUMREP</Link></h1>
