@@ -1,6 +1,54 @@
-'use client';
+'use client'
 import Link from "next/link";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { collection, getDocs, query, orderBy, where, limit, getDoc, doc } from "firebase/firestore";
+import { useAuthContext } from "@/context/AuthContext";
+import { db } from "@/firebase/config";
+import List from "@/components/list";
+
+
 export default function Document() {
+  const [data,setData] = useState([])
+  const { user } = useAuthContext()
+  const router = useRouter()
+
+  useEffect(() => {
+      if (user == null) router.push("/auth")
+  }, [user])
+
+  useEffect(() => {
+    const getData = async () => {
+      var arr = []
+      const dbi = collection(db, 'Users');
+      var queryy
+
+      //Authenticated User
+      const docRef = doc(db, "Users", user.uid);
+      const docSnap = await getDoc(docRef);
+      const userType = docSnap.data().type
+      if(userType == "Admin") {
+        queryy = query(dbi, where("isApproved", "==", false));
+      }
+      else if(userType == "Evaluator") {
+        queryy = query(dbi, where("isApproved", "==", true), where("type", "==", "Student"));
+      }
+
+      
+      const querySnap = await getDocs(queryy);
+      querySnap.forEach((doc) => {
+          // doc.data() is never undefined for query doc snapshots
+          arr.push(JSON.parse(JSON.stringify(doc.data())))
+        });
+      setData(arr)
+
+    }
+    if(user != null) {
+        getData()
+    }
+        
+    
+  },[])
     return (
       <>
         <div className="flex justify-center m-10">
@@ -13,15 +61,7 @@ export default function Document() {
         </div>
         </div>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 justify-items-center">
-            <div className="bg-menuvar-200 rounded-xl w-72 h-44 drop-shadow-xl m-10 flex flex-col justify-evenly p-5">
-                <p>Student Name:</p>
-                <p>Department:</p>
-                <p>Company:</p>
-                <p>Internship Period:</p>
-                <Link href="/documents/1"><button className="btn w-24 h-8 place-self-center m-2">Evaluate</button></Link>
-            </div>
-        </div>
+        <List arr={data}/>
       
       </>
     )
