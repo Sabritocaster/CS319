@@ -13,10 +13,12 @@ module.exports = {
           'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
       },
       colors: {
-        cumrep: {
-          100:"#f2f2f2",
-          200:"#00529f",
-          300:"#FF5722"
+        menuvar: {
+          100:"#FF8600",
+          200:"#FFF8F0",
+          300:"#FF5722",
+          400:"#57636C",
+          500:"#101213"
         }
       },
     },

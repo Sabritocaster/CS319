@@ -1,54 +1,40 @@
 'use client'
-import Link from "next/link";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { collection, getDocs, query, orderBy, where, limit, getDoc, doc } from "firebase/firestore";
+import React from "react";
 import { useAuthContext } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import List from "@/components/list";
-
-
 export default function Document() {
-  const [data,setData] = useState([])
   const { user } = useAuthContext()
-  const router = useRouter()
+    const router = useRouter()
+    const [data,setData] = useState([])
+   
+    React.useEffect(() => {
+        if (user == null) router.push("/auth")
+    }, [user])
 
-  useEffect(() => {
-      if (user == null) router.push("/auth")
-  }, [user])
-
-  useEffect(() => {
-    const getData = async () => {
-      var arr = []
-      const dbi = collection(db, 'Users');
-      var queryy
-
-      //Authenticated User
-      const docRef = doc(db, "Users", user.uid);
-      const docSnap = await getDoc(docRef);
-      const userType = docSnap.data().type
-      if(userType == "Admin") {
-        queryy = query(dbi, where("isApproved", "==", false));
-      }
-      else if(userType == "Evaluator") {
-        queryy = query(dbi, where("isApproved", "==", true), where("type", "==", "Student"));
-      }
-
-      
-      const querySnap = await getDocs(queryy);
-      querySnap.forEach((doc) => {
-          // doc.data() is never undefined for query doc snapshots
-          arr.push(JSON.parse(JSON.stringify(doc.data())))
-        });
-      setData(arr)
-
-    }
-    if(user != null) {
-        getData()
-    }
+    React.useEffect(() => {
+        const getData = async () => {
+          var docs = [];
+          const q = query(collection(db, "Users"), where("type", "==", "Student"));
+          const querySnapshot = await getDocs(q);          
+          querySnapshot.forEach((doc) => {
+            // doc.data() is never undefined for query doc snapshots
+            console.log(doc.id, " => ", doc.data());
+            docs.push(doc.data())
+          });
+          setData(docs)
+        }
+        if(user!=null) {
+            getData()
+            
+        }
         
-    
-  },[])
+    }, [])
+
+
     return (
       <>
         <div className="flex justify-center m-10">

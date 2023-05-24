@@ -1,100 +1,116 @@
 'use client'
 import React from "react";
-import Image from "next/image"
 import { useAuthContext } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
-import { db } from "@/firebase/config";
-import {doc, getDoc} from "@firebase/firestore"
-import { getStorage, ref,uploadBytesResumable, getDownloadURL  } from "@firebase/storage";
+import Image from "next/image"
+import logOut from "@/firebase/auth/logout";
+import { useState } from "react";
 import { storage } from "@/firebase/config";
-import View from "@/components/view";
-import Process from "@/components/process";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import View from '@/components/view';
+import Process from '@/components/process';
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/firebase/config";
+import { getStorage } from "@firebase/storage";
+
 
 export default function Profile() {
-    
     const { user } = useAuthContext()
     const router = useRouter()
+    const [url,setUrl] = useState()
     const [data,setData] = useState()
-    const [url, setUrl] = useState()
+    //Logout starts
+    const handleClick = async (event) => {
+        event.preventDefault()
 
-    const[isVisible,setVisible] = useState(false)
-    const [file, setFile] = useState("");
-    const [percent, setPercent] = useState(0);
-    // Handles input change event and updates state
-    function handleChange(event) {
-        setFile(event.target.files[0]);
-    }
-    function handleUpload() {
-        if (!file) {
-            alert("Please choose a file first!")
+        const { result, error } = await logOut();
+
+        if (error) {
+            return console.log(error)
         }
-        else {
-        setVisible(true)
-        const storageRef = ref(storage, `/files/${user.uid}`)
-        const uploadTask = uploadBytesResumable(storageRef, file);
-        uploadTask.on(
-                    "state_changed",
-                    (snapshot) => {
-                        const percent = Math.round(
-                            (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-                        );
-             
-                        // update progress
-                        setPercent(percent);
-                    },
-                    (err) => console.log(err),
-                    () => {
-                        // download url
-                        getDownloadURL(uploadTask.snapshot.ref).then((url) => {
-                            
-                        });
-                    }
-                ); 
-            window.location.reload(false)
+
+        // else successful
+        console.log(result)
+        return router.push("/auth")
     }
-    }
+    //Logout Ends
 
     React.useEffect(() => {
         if (user == null) router.push("/auth")
-        
-
     }, [user])
 
     React.useEffect(() => {
-        if (user != null) {
-        const storage = getStorage();
-        const starsRef = ref(storage, '/files/'+user.uid);
-
-        // Get the download URL
-        getDownloadURL(starsRef)
-        .then((url) => {
-            // `url` is the download URL for 'images/stars.jpg'
-            //console.log(url)
-            setUrl(url)
-        
-        })
-        }
-
-    }, [url])
- 
-
-
-    
-    useEffect(() => {
-        const getData = async () => {
-            const docRef = doc(db, "Users", user.uid);
-            const docSnap = await getDoc(docRef);
-            console.log(docSnap.data())
+        const getData = async (key) => {
+            const docRef = doc(db, "Users", key);
+            const docSnap = await getDoc(docRef);  
             setData(docSnap.data())
+        }
+        if(user!=null) {
+            getData(user.uid)
+            const storage = getStorage();
+            const starsRef = ref(storage, '/files/'+user.uid);
+            var docURL;
 
+            // Get the download URL
+            getDownloadURL(starsRef)
+            .then((url) => {
+                // `url` is the download URL for 'images/stars.jpg'
+                //console.log(url)
+                setUrl(url)
+                
+            })
         }
-        if(user != null) {
-            getData()
-        }
-            
         
-    },[])
+    }, [])
+
+
+    //Storage
+    const [file, setFile] = useState("");
+ 
+    // progress
+    const [percent, setPercent] = useState(0);
+ 
+    // Handle file upload event and update state
+    function handleChange(event) {
+        setFile(event.target.files[0]);
+    }
+ 
+    const handleUpload = () => {
+        if (!file) {
+            alert("Please upload a file first!");
+        }
+        else {
+        const storageRef = ref(storage, `/files/${user.uid}`);
+ 
+        // progress can be paused and resumed. It also exposes progress updates.
+        // Receives the storage reference and the file to upload.
+        const uploadTask = uploadBytesResumable(storageRef, file);
+ 
+        uploadTask.on(
+            "state_changed",
+            (snapshot) => {
+                const percent = Math.round(
+                    (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+                );
+ 
+                // update progress
+                setPercent(percent);
+            },
+            (err) => console.log(err),
+            () => {
+                // download url
+                getDownloadURL(uploadTask.snapshot.ref).then((url) => {
+                    setUrl(url)
+                });
+            }
+        );
+        }
+    };
+
+
+
+
+
 
     return (
       <>
@@ -113,7 +129,6 @@ export default function Profile() {
                 <p>Internship Place:</p>
                 <div className="flex items-center">
                     <p>Evaluation Process: </p>
-
                     <Process process={data?.process}/>
                 </div>
 
@@ -125,15 +140,16 @@ export default function Profile() {
                 <p>Upload Internship Report</p>
                 <input type="file" onChange={handleChange} className="file-input file-input-bordered w-full max-w-xs" />
                 <div>
-                    {isVisible &&(<p>{percent == 100 ? "Upload Successful": (percent+"% Done") }</p>)} 
-                    <button onClick={handleUpload} className="btn m-5">Upload</button>
+                    <button onClick={handleUpload} className="btn m-5">Confirm</button>
+                    <p>{percent} "% done"</p>
                 </div>
                 
             </div>
             <View url={url}/>
         </div>
+        <btn onClick={handleClick} className="btn">Log out</btn>
       
       </>
     )
   }
-
+  

@@ -1,79 +1,66 @@
 'use client'
+import React from "react";
+import signUp from "@/firebase/auth/signup";
+import signIn from "@/firebase/auth/signin";
+import { useRouter } from 'next/navigation'
 import Image from "next/image"
 import { useState } from "react"
 import { useForm } from "react-hook-form";
-import { useRouter } from "next/navigation";
-import { doc, setDoc } from "firebase/firestore"; 
+import { doc, setDoc } from "firebase/firestore";
 import { db } from "@/firebase/config";
-import signUp from "@/firebase/auth/signup";
-import signIn from "@/firebase/auth/signin";
-import React from "react";
 import { useAuthContext } from "@/context/AuthContext";
-
-
 
 export default function Auth() {
     const [isLogin,setLogin] = useState(true);
-    const router = useRouter()
-    const { user } = useAuthContext()
-
-    
-
-
     const { register, handleSubmit } = useForm();
+    const router = useRouter()
 
-    const onSubmit = async (data) => {
-        if(isLogin) {
-            const { result, error } = await signIn(data.email, data.password);
-
-            if (error) {
-                return console.log(error)
-            }
-
-            // else successful
-            console.log(result.user.uid)
-            return router.push("/profile")
-        }
-        else {
-            const { result, error } = await signUp(data.email, data.password);
-
-            if (error) {
-                return console.log(error)
-            }
-
-            // else successful
-            var isApproved = false
-            if(data.type=="Student") {
-                isApproved=true
-            }
-            const docRef = await setDoc(doc(db, "Users", result.user.uid), {
-                type: data.type, ///student, TA, evaluator
-                name: data.name,
-                bilkent_id: data.bilkent_id,
-                email:data.email,
-                uid:result.user.uid,
-                process:0, //0-initial 1-both reports uploaded, 2-preevaluated, 3-evaluated, 4-done
-                studentReport:"",
-                interReport:"",
-                isApproved: isApproved,
-                studentGrade:0,
-                internGrade:0,
-                feedback1:"",
-                feedback2:"",
-                department:data.department
-              });
-            return router.push("/profile")
-
-        }
-        
-    }
+    const { user } = useAuthContext()
 
     React.useEffect(() => {
         if (user != null) router.push("/profile")
-
     }, [user])
-    
-   
+ 
+    const handleForm = async (value) => {
+        if(isLogin) {
+            var { result, error } = await signIn(value.email, value.password);
+        }
+        else{
+            var { result, error } = await signUp(value.email, value.password);
+            console.log(result.user.uid)
+            var approved = false;
+            if(value.type=="Student") {
+                approved = true;
+            }
+            await setDoc(doc(db, "Users", result.user.uid),{
+                        name:value.name,
+                        bilkent_id:value.id,
+                        department:value.department,
+                        email:value.email,
+                        feedback1:"",
+                        feedback2:"",
+                        internReport:"",
+                        internGrade:"",
+                        isApproved:approved,
+                        process:0,
+                        studentGrade:0,
+                        studentReport:"",
+                        type:value.type,
+                        uid:result.user.uid
+                        })
+
+        }
+        
+
+        if (error) {
+            return console.log(error)
+        }
+
+        // else successful
+        console.log(result)
+        return router.push("/profile")
+    }
+
     return (
       <>
         <div className="flex flex-col items-center"> 
@@ -86,16 +73,16 @@ export default function Auth() {
 
             {isLogin && (
 
-                <form className="flex flex-col items-center" onSubmit={handleSubmit(onSubmit)}>
+                <form className="flex flex-col items-center" onSubmit={handleSubmit((value) => handleForm(value))}>
 
-                    <div className="flex flex-row w-full justify-center mb-5">
+                    <div className="flex flex-row w-full justify-center">
                         <button onClick={() => setLogin(true)} className="btn border-none bg-menuvar-300 mr-2">Login</button>
                         <button onClick={() => setLogin(false)} className="btn border-none bg-menuvar-100 ml-2">Register</button>
                     </div>
                     
         
         
-                    
+                   
         
         
                     <div className="form-control w-full max-w-xs">
@@ -121,7 +108,7 @@ export default function Auth() {
 
             {!isLogin && (
 
-            <form className="flex flex-col items-center" onSubmit={handleSubmit(onSubmit)}>
+            <form className="flex flex-col items-center" onSubmit={handleSubmit((data) => handleForm(data))}>
 
                 <div className="flex flex-row w-full justify-center">
                     <button onClick={() => setLogin(true)} className="btn border-none bg-menuvar-100 mr-2">Login</button>
@@ -134,8 +121,8 @@ export default function Auth() {
                     <label className="label">
                         <span className="label-text">Account Type</span>
                     </label>
-                    <select defaultValue={"Select"} {...register("type", { required: true })} className="select select-bordered text-center">
-                        <option disabled >Select</option>
+                    <select {...register("type")} className="select select-bordered text-center">
+                        <option disabled selected>Select</option>
                         <option>Student</option>
                         <option>Evaluator</option>
                     </select>
@@ -143,10 +130,10 @@ export default function Auth() {
 
                 <div className="form-control w-full max-w-xs">
                     <label className="label">
-                        <span className="label-text">Department</span>
+                        <span className="label-text">Account Type</span>
                     </label>
-                    <select defaultValue={"Select"} {...register("department", { required: true })} className="select select-bordered text-center">
-                        <option disabled >Select</option>
+                    <select {...register("department")} className="select select-bordered text-center">
+                        <option disabled selected>Select</option>
                         <option>CS</option>
                         <option>EE</option>
                         <option>ME</option>
@@ -165,7 +152,7 @@ export default function Auth() {
                     <label className="label">
                         <span className="label-text">Bilkent ID</span>
                     </label>
-                    <input {...register("bilkent_id")} type="text" placeholder="ID" className="input input-bordered w-full max-w-xs" />
+                    <input {...register("id")} type="text" placeholder="ID" className="input input-bordered w-full max-w-xs" />
                 </div>
 
                 <div className="form-control w-full max-w-xs">
@@ -186,10 +173,10 @@ export default function Auth() {
                     <label className="label">
                         <span className="label-text">Confirm Password</span>
                     </label>
-                    <input {...register("confirmPassword")} type="password" placeholder="Password" className="input input-bordered w-full max-w-xs" />
+                    <input type="password" placeholder="Confirm Password" className="input input-bordered w-full max-w-xs" />
                 </div>
 
-                <button type="submit" className="btn btn-xs my-10 btn-md lg:btn-lg">Register</button>
+                <button type="submit "className="btn btn-xs my-10 btn-md lg:btn-lg">Register</button>
 
 
                 </form>
