@@ -30,7 +30,7 @@ export default function Assign() {
                 <p>Student Name:</p>
                 <p>Company Name:</p>
             </div>
-            <p>Student</p>
+            <p>Student:</p>
             <p>Will be assigned to</p>
             <p>TA:</p>
             <button className="btn">Confirm</button>
