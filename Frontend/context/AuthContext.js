@@ -31,6 +31,8 @@ export const AuthContextProvider = ({
         return () => unsubscribe();
     }, []);
 
+   
+
     return (
         <AuthContext.Provider value={{ user }}>
             {loading ? <div><Loading /></div> : children}

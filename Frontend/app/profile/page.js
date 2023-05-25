@@ -12,6 +12,7 @@ import Process from '@/components/process';
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { getStorage } from "@firebase/storage";
+import autoAssign from "@/script/autoassign";
 
 
 export default function Profile() {
@@ -31,12 +32,12 @@ export default function Profile() {
 
         // else successful
         console.log(result)
-        return router.push("/auth")
+        return router.push("/")
     }
     //Logout Ends
 
     React.useEffect(() => {
-        if (user == null) router.push("/auth")
+        if (user == null) router.push("/")
     }, [user])
 
     React.useEffect(() => {
@@ -49,7 +50,6 @@ export default function Profile() {
             getData(user.uid)
             const storage = getStorage();
             const starsRef = ref(storage, '/files/'+user.uid);
-            var docURL;
 
             // Get the download URL
             getDownloadURL(starsRef)
@@ -90,7 +90,7 @@ export default function Profile() {
             "state_changed",
             (snapshot) => {
                 const percent = Math.round(
-                    (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+                    (snapshot.bytesTransferred / snapshot.totalBytes) * 100
                 );
  
                 // update progress
@@ -104,7 +104,9 @@ export default function Profile() {
                 });
             }
         );
+        autoAssign(user.uid)
         }
+
     };
 
 

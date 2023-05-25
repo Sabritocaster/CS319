@@ -12,14 +12,14 @@ export default function Document() {
     const [data,setData] = useState([])
    
     React.useEffect(() => {
-        if (user == null) router.push("/auth")
+        if (user == null) router.push("/")
     }, [user])
 
     React.useEffect(() => {
         const getData = async () => {
           var docs = [];
-          const q = query(collection(db, "Users"), where("type", "==", "Student"));
-          const querySnapshot = await getDocs(q);          
+          const q = query(collection(db, "Users"), where("type", "==", "Student")); 
+          const querySnapshot = await getDocs(q); //process: 0 no file uploads, 1 all files uploaded, 2 preevaluated, 3 evaluated, 4 done       
           querySnapshot.forEach((doc) => {
             // doc.data() is never undefined for query doc snapshots
             console.log(doc.id, " => ", doc.data());

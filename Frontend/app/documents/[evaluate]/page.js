@@ -15,25 +15,31 @@ export default function Evaluate({params}) {
     const router = useRouter()
     const [data,setData] = useState([])
     const [url,setUrl] = useState()
-    const { register, handleSubmit } = useForm();
-
+    const { register, handleSubmit, setValue } = useForm();
+    const [type,setType] = useState()
+    const [process,setProcess] = useState()
 
    
     useEffect(() => {
-        if (user == null) router.push("/auth")
+        if (user == null) router.push("/")
     }, [user])
 
     useEffect(() => {
-        const getData = async (key) => {
+        const getData = async () => {
             const docRef = doc(db, "Users", params.evaluate);
             const docSnap = await getDoc(docRef);  
             setData(docSnap.data())
         }
+        const getType = async (key) => {
+            const docRef = doc(db, "Users", key);
+            const docSnap = await getDoc(docRef);  
+            setType(docSnap.data())
+        }
         if(user!=null) {
-            getData(user.uid)
+            getData()
+            getType(user.uid)
             const storage = getStorage();
-            const starsRef = ref(storage, '/files/'+user.uid);
-            var docURL;
+            const starsRef = ref(storage, '/files/'+params.evaluate);
 
             // Get the download URL
             getDownloadURL(starsRef)
@@ -49,17 +55,32 @@ export default function Evaluate({params}) {
 
     const handleForm = async (value) => {
         const ref = doc(db, "Users", params.evaluate);
-
         // Set the "capital" field of the city 'DC'
-        await updateDoc(ref, {
-        internGrade: value.internGrade,
-        studentGrade: value.studentGrade,
-        feedback1: value.feedback
-        });
+        if(type.type=="TA") {
+            await updateDoc(ref, {
+                studentGrade: value.studentGrade,
+                feedback: value.feedback,
+                process:value.process
+                });
+        
+                alert("Feedback Submitted")
+        }
+        else if(type.type=="Evaluator") {
+            await updateDoc(ref, {
+                studentGrade: value.studentGrade,
+                internGrade:value.internGrade,
+                process:process
+                });
+        
+                alert("Grades Submitted")
 
-        alert("Grades Submitted")
+        }
+
+        
         
     }
+
+    
 
     return (
       <>
@@ -77,38 +98,72 @@ export default function Evaluate({params}) {
             </div>
         </div>
 
-        <form onSubmit={handleSubmit((value) => handleForm(value))} className="lg:w-2/3 bg-menuvar-200 rounded-xl flex flex-col items-center p-5 m-10 lg:mr-0">
+        {type?.type=="Evaluator" &&(
+            <form onSubmit={handleSubmit((value) => handleForm(value))} className="lg:w-2/3 border-menuvar-400 border-2 rounded-xl flex flex-col items-center p-5 m-10 lg:mr-0">
             
-            <div>
-            <div className="form-control">
-                <label className="label">
-                    <span className="label-text">Student Internship Report</span>
-                </label>
-                <label className="input-group">
-                    <span>Grade</span>
-                    <input {...register("studentGrade")} type="number" max={10} id="student" placeholder="" className="input input-bordered w-14" />
-                    <span>/10</span>
-                </label>
-            </div>
+                <div>
+                <div className="form-control">
+                    <label className="label">
+                        <span className="label-text">Student Internship Report</span>
+                    </label>
+                    <label className="input-group">
+                        <span>Grade</span>
+                        <input {...register("studentGrade")} type="number" max={10} id="student" placeholder="" className="input input-bordered w-14" />
+                        <span>/10</span>
+                    </label>
+                </div>
 
-            <div className="form-control">
-                <label className="label">
-                    <span className="label-text">Company Internship Report</span>
-                </label>
-                <label className="input-group">
-                    <span>Grade</span>
-                    <input {...register("internGrade")} type="number" max={10} id="company" placeholder="" className="input input-bordered w-14" />
-                    <span>/10</span>
-                </label>
-            </div>
-            </div>
+                <div className="form-control">
+                    <label className="label">
+                        <span className="label-text">Company Internship Report</span>
+                    </label>
+                    <label className="input-group">
+                        <span>Grade</span>
+                        <input {...register("internGrade")} type="number" max={10} id="company" placeholder="" className="input input-bordered w-14" />
+                        <span>/10</span>
+                    </label>
+                </div>
+                </div>
 
-            <textarea {...register("feedback")} className="textarea textarea-bordered mt-5" placeholder="Your Feedback"></textarea>
+                <p className="mt-5 mb-2">Overall Grade:</p>
+                <button type="submit" className="btn">Submit</button>
 
-            <p className="mt-5 mb-2">Overall Grade:</p>
-            <button type="submit" className="btn">Submit</button>
+            </form>
 
-        </form>
+        )}
+
+        {type?.type=="Teaching Assistant" &&(
+                    <form onSubmit={handleSubmit((value) => handleForm(value))} className="lg:w-2/3  border-menuvar-400 border-2 rounded-xl flex flex-col items-center p-5 m-10 lg:mr-0">
+                    
+                        <div>
+                        <div className="form-control">
+                            <label className="label">
+                                <span className="label-text">Student Internship Report</span>
+                            </label>
+                            <label className="input-group">
+                                <span>Grade</span>
+                                <input {...register("studentGrade")} type="number" max={10} id="student" placeholder="" className="input input-bordered w-14" />
+                                <span>/10</span>
+                            </label>
+                        </div>
+
+                       
+                        </div>
+
+                        <textarea {...register("feedback")} className="textarea textarea-bordered mt-5 bg-menuvar-200" cols={30} rows={10} placeholder="Your Feedback"></textarea>
+                        
+                        <div className="flex p-4 space-x-6">
+                            <button {...register("process")} onClick={()=> setValue("process", 1)} onSubmit={handleSubmit((value) =>handleForm(value))} type='submit' className="btn">Decline</button>
+                            <button {...register("process")} onClick={()=> setValue("process", 2)} onSubmit={handleSubmit((value) => handleForm(value))} type="submit" className="btn">Accept</button>
+                        </div>
+                        
+
+                    </form>
+
+                    
+                    
+                )}
+        
 
       </div>
       
