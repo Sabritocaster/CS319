@@ -2,23 +2,59 @@
 import React from "react";
 import { useAuthContext } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { useState, useEffect } from "react";
+import { collection, query, where, getDocs, getDoc, doc } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import List from "@/components/list";
+
 export default function Document() {
   const { user } = useAuthContext()
     const router = useRouter()
     const [data,setData] = useState([])
    
+    
     React.useEffect(() => {
         if (user == null) router.push("/auth")
     }, [user])
 
+    var userType;
+    useEffect(() => {
+      const getData = async () => {
+          const docRef = doc(db, "Users", user.uid);
+          const docSnap = await getDoc(docRef);  
+          setData(docSnap.data())
+      }
+      const getType = async (key) => {
+          const docRef = doc(db, "Users", user.uid);
+          const docSnap = await getDoc(docRef);  
+          setData(docSnap.data())
+      }
+      if(user!=null) {
+          getData()
+          userType = getType(user.type);
+          userType.then(value => {
+            alert(value);
+          })
+          
+      }
+      
+  }, [])
+
     React.useEffect(() => {
         const getData = async () => {
           var docs = [];
-          const q = query(collection(db, "Users"), where("type", "==", "Student"));
+          var q;
+          
+          
+          if( userType == "Student"){
+            q = query(collection(db, "Users"), where("uid", "==", user.uid));
+          }
+          else {
+            q = query(collection(db, "Users"), where("type", "==", "Student"));
+          }
+          
+
+          //q = query(collection(db, "Users"), where("uid", "==", user.uid));
           const querySnapshot = await getDocs(q);          
           querySnapshot.forEach((doc) => {
             // doc.data() is never undefined for query doc snapshots
