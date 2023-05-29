@@ -1,10 +1,56 @@
-'use client';
-import Link from "next/link";
+'use client'
+import React from "react";
+import { useAuthContext } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { collection, query, where, getDocs, getDoc, doc } from "firebase/firestore";
+import { db } from "@/firebase/config";
+import List from "@/components/list";
+import Assign from "@/components/assign";
 export default function Document() {
+  const { user } = useAuthContext()
+    const router = useRouter()
+    const [userData, setUserData] = useState()
+    const [isAssign,setAssign] = useState(false)
+
+   
+    React.useEffect(() => {
+        if (user == null) router.push("/")
+    }, [user])
+
+    React.useEffect(() => {
+      const getUser = async (key) => {
+          const docRef = doc(db, "Users", key);
+          const docSnap = await getDoc(docRef);  
+          setUserData(docSnap.data())
+      }
+      if(user!=null) {
+          getUser(user.uid)
+      }
+      
+  }, [])
+
+      React.useEffect(() => {
+        if (userData?.type == "Student") router.push("/profile")
+    }, [userData])
+
+    
+
+
     return (
       <>
-        <div className="flex justify-center m-10">
-        <div className="form-control">
+        <div className="flex flex-col lg:flex-row justify-center items-center m-10">
+        {userData?.type == "Department Secretary" && (<>
+        {isAssign && (<div className="flex flex-row w-full justify-center">
+                        <button onClick={() => setAssign(false)} className="btn w-28 border-none bg-menuvar-600 mr-2">Accounts</button>
+                        <button onClick={() => setAssign(true)} className="btn w-28 border-none bg-menuvar-300 ml-2">Assign</button>
+                        </div>)}
+        {!isAssign && (<div className="flex flex-row w-full justify-center">
+                        <button onClick={() => setAssign(false)} className="btn border-none bg-menuvar-300 mr-2">Accounts</button>
+                        <button onClick={() => setAssign(true)} className="btn border-none bg-menuvar-600 ml-2">Assign</button>
+                    </div>)}
+                    </> )}
+        <div className="form-control m-5 lg:mr-32">
         <div className="input-group">
             <input type="text" placeholder="Search…" className="input input-bordered" />
             <button className="btn btn-square">
@@ -13,15 +59,13 @@ export default function Document() {
         </div>
         </div>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 justify-items-center">
-            <div className="bg-menuvar-200 rounded-xl w-72 h-44 drop-shadow-xl m-10 flex flex-col justify-evenly p-5">
-                <p>Student Name:</p>
-                <p>Department:</p>
-                <p>Company:</p>
-                <p>Internship Period:</p>
-                <Link href="/documents/1"><button className="btn w-24 h-8 place-self-center m-2">Evaluate</button></Link>
-            </div>
-        </div>
+        {isAssign &&(
+          <Assign />
+        )}
+        {!isAssign &&(
+          <List type={userData?.type} assigned_reports={userData?.assigned_reports} isApproved={userData?.isApproved}/>
+        )}
+        
       
       </>
     )

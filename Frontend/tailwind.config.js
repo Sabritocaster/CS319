@@ -5,6 +5,9 @@ module.exports = {
     './components/**/*.{js,ts,jsx,tsx,mdx}',
     './app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
+  daisyui: {
+    themes: false,
+  },
   theme: {
     extend: {
       backgroundImage: {
@@ -14,11 +17,12 @@ module.exports = {
       },
       colors: {
         menuvar: {
-          100:"#FF8600",
+          100:"#00529f",
           200:"#FFF8F0",
           300:"#FF5722",
           400:"#57636C",
-          500:"#101213"
+          500:"#101213",
+          600:"#3e4450"
         }
       },
     },
