@@ -27,27 +27,47 @@ export default function Auth() {
         }
         else{
             var { result, error } = await signUp(value.email, value.password);
-            console.log(result.user.uid)
-            var approved = false;
-            if(value.type=="Student") {
-                approved = true;
+   
+            const student = {
+                name:value.name,
+                department:value.department,
+                email:value.email,
+                process:0,
+                type:value.type,
+                uid:result.user.uid,
+                isAssigned:false,
+                isAssigned2:false
+                }
+            const TA = {
+                name:value.name,
+                department:value.department,
+                email:value.email,
+                isApproved:false,
+                type:value.type,
+                uid:result.user.uid,
+                assigned_reports:[],
+                }
+            const evaluator = {
+                name:value.name,
+                department:value.department,
+                email:value.email,
+                isApproved:false,
+                type:value.type,
+                uid:result.user.uid,
+                assigned_reports:[],
+                }
+            var data;
+            if(value.type == "Student") {
+                data = student
             }
-            await setDoc(doc(db, "Users", result.user.uid),{
-                        name:value.name,
-                        bilkent_id:value.id,
-                        department:value.department,
-                        email:value.email,
-                        feedback:"",
-                        internReport:"",
-                        internGrade:"",
-                        isApproved:approved,
-                        process:0,
-                        studentGrade:0,
-                        studentReport:"",
-                        type:value.type,
-                        uid:result.user.uid,
-                        assigned_reports:[]
-                        })
+            else if(value.type == "Teaching Assistant") {
+                data = TA
+            }
+            else if(value.type == "Evaluator") {
+                data = evaluator
+            }
+            
+            await setDoc(doc(db, "Users", result.user.uid),data)
 
         }
         
@@ -60,6 +80,8 @@ export default function Auth() {
         console.log(result)
         return router.push("/profile")
     }
+
+    
 
     return (
       <>
@@ -77,7 +99,7 @@ export default function Auth() {
 
                     <div className="flex flex-row w-full justify-center">
                         <button onClick={() => setLogin(true)} className="btn border-none bg-menuvar-300 mr-2">Login</button>
-                        <button onClick={() => setLogin(false)} className="btn border-none bg-menuvar-100 ml-2">Register</button>
+                        <button onClick={() => setLogin(false)} className="btn border-none bg-menuvar-600 ml-2">Register</button>
                     </div>
                     
         
@@ -111,7 +133,7 @@ export default function Auth() {
             <form className="flex flex-col items-center" onSubmit={handleSubmit((data) => handleForm(data))}>
 
                 <div className="flex flex-row w-full justify-center">
-                    <button onClick={() => setLogin(true)} className="btn border-none bg-menuvar-100 mr-2">Login</button>
+                    <button onClick={() => setLogin(true)} className="btn border-none bg-menuvar-600 mr-2">Login</button>
                     <button onClick={() => setLogin(false)} className="btn border-none bg-menuvar-300 ml-2">Register</button>
                 </div>
                 
@@ -131,7 +153,7 @@ export default function Auth() {
 
                 <div className="form-control w-full max-w-xs">
                     <label className="label">
-                        <span className="label-text">Account Type</span>
+                        <span className="label-text">Department</span>
                     </label>
                     <select {...register("department")} className="select select-bordered text-center">
                         <option disabled selected>Select</option>
@@ -147,13 +169,6 @@ export default function Auth() {
                         <span className="label-text">Full Name</span>
                     </label>
                     <input {...register("name")} type="text" placeholder="Name" className="input input-bordered w-full max-w-xs" />
-                </div>
-
-                <div className="form-control w-full max-w-xs">
-                    <label className="label">
-                        <span className="label-text">Bilkent ID</span>
-                    </label>
-                    <input {...register("id")} type="text" placeholder="ID" className="input input-bordered w-full max-w-xs" />
                 </div>
 
                 <div className="form-control w-full max-w-xs">
@@ -177,7 +192,7 @@ export default function Auth() {
                     <input type="password" placeholder="Confirm Password" className="input input-bordered w-full max-w-xs" />
                 </div>
 
-                <button type="submit "className="btn btn-xs my-10 btn-md lg:btn-lg">Register</button>
+                <button type="submit" className="btn btn-xs my-10 btn-md lg:btn-lg">Register</button>
 
 
                 </form>

@@ -3,42 +3,54 @@ import React from "react";
 import { useAuthContext } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { collection, query, where, getDocs, getDoc, doc } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import List from "@/components/list";
+import Assign from "@/components/assign";
 export default function Document() {
   const { user } = useAuthContext()
     const router = useRouter()
-    const [data,setData] = useState([])
+    const [userData, setUserData] = useState()
+    const [isAssign,setAssign] = useState(false)
+
    
     React.useEffect(() => {
         if (user == null) router.push("/")
     }, [user])
 
     React.useEffect(() => {
-        const getData = async () => {
-          var docs = [];
-          const q = query(collection(db, "Users"), where("type", "==", "Student")); 
-          const querySnapshot = await getDocs(q); //process: 0 no file uploads, 1 all files uploaded, 2 preevaluated, 3 evaluated, 4 done       
-          querySnapshot.forEach((doc) => {
-            // doc.data() is never undefined for query doc snapshots
-            console.log(doc.id, " => ", doc.data());
-            docs.push(doc.data())
-          });
-          setData(docs)
-        }
-        if(user!=null) {
-            getData()
-            
-        }
-        
-    }, [])
+      const getUser = async (key) => {
+          const docRef = doc(db, "Users", key);
+          const docSnap = await getDoc(docRef);  
+          setUserData(docSnap.data())
+      }
+      if(user!=null) {
+          getUser(user.uid)
+      }
+      
+  }, [])
+
+      React.useEffect(() => {
+        if (userData?.type == "Student") router.push("/profile")
+    }, [userData])
+
+    
 
 
     return (
       <>
-        <div className="flex justify-center m-10">
-        <div className="form-control">
+        <div className="flex flex-col lg:flex-row justify-center items-center m-10">
+        {userData?.type == "Department Secretary" && (<>
+        {isAssign && (<div className="flex flex-row w-full justify-center">
+                        <button onClick={() => setAssign(false)} className="btn w-28 border-none bg-menuvar-600 mr-2">Accounts</button>
+                        <button onClick={() => setAssign(true)} className="btn w-28 border-none bg-menuvar-300 ml-2">Assign</button>
+                        </div>)}
+        {!isAssign && (<div className="flex flex-row w-full justify-center">
+                        <button onClick={() => setAssign(false)} className="btn border-none bg-menuvar-300 mr-2">Accounts</button>
+                        <button onClick={() => setAssign(true)} className="btn border-none bg-menuvar-600 ml-2">Assign</button>
+                    </div>)}
+                    </> )}
+        <div className="form-control m-5 lg:mr-32">
         <div className="input-group">
             <input type="text" placeholder="Search…" className="input input-bordered" />
             <button className="btn btn-square">
@@ -47,7 +59,13 @@ export default function Document() {
         </div>
         </div>
         </div>
-        <List arr={data}/>
+        {isAssign &&(
+          <Assign />
+        )}
+        {!isAssign &&(
+          <List type={userData?.type} assigned_reports={userData?.assigned_reports} isApproved={userData?.isApproved}/>
+        )}
+        
       
       </>
     )

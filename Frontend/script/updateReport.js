@@ -1,42 +1,26 @@
-import { doc, updateDoc,arrayUnion } from "firebase/firestore";
+import { doc, updateDoc,addDoc } from "firebase/firestore";
 import { collection, query, where, getDocs,getDoc } from "firebase/firestore";
 import { db } from "@/firebase/config";
 
-export default async function autoAssign(studentID) {
+export default async function updateReport(studentID,url,type,file_id="",feedback="",grade=0) {
 
 
-        var temp;
-        let min = 31000
-        var id
-
-        
-
-          const assignToTA = async (id,assigned) => {
-
-            if(assigned==false) {
-              const refTA = doc(db, "Users", id);
-              // Set the "capital" field of the city 'DC'
-              updateDoc(refTA, {
-              assigned_reports: arrayUnion(studentID)
+    const updateCollection = async (url,id) => {
+         
+              const docReff = doc(db, "Users", id, "Documents",file_id)
+              await updateDoc(docReff, {
+                feedback: feedback,
+                grade:grade,
+                updateAt:(new Date()).getTime(),
+                feedback_url:url ? url : ""
               });
-              assignStudent()
-
+            
             }
-            else {
-            }
-                
             
 
-        }
-          function myFunction(value) {
-            //console.log("ASSIGNED REPORT IS "+value?.assigned_reports)
-            temp = (value?.assigned_reports).length
-            if(temp<min) {
-                min=temp
-                id = value?.uid
-            }
-        }
-
+        
+         
+        /*
         const getData = async () => {
           var docs = [];
           const q = query(collection(db, "Users"), where("type", "==", "Teaching Assistant")); 
@@ -66,9 +50,9 @@ export default async function autoAssign(studentID) {
         
         
         data.forEach(myFunction);
+        */
 
-        
-        assignToTA(id,student?.isAssigned)
+        updateCollection(url,studentID,type)
         
 
    

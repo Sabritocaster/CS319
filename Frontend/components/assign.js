@@ -11,7 +11,7 @@ import {  updateDoc, arrayUnion } from "firebase/firestore";
 
 
 
-export default function Approve() {
+export default function Assign() {
 
 
     const { user } = useAuthContext()
@@ -44,7 +44,7 @@ export default function Approve() {
           isAssigned2:true
       });
       }
-      
+      getStudents()
       alert("Assigned succesfully")
     
     }
@@ -58,7 +58,7 @@ export default function Approve() {
     const getStudents = async () => {
       var docs = [];
       //var q;
-        const q = query(collection(db, "Users"), where("type", "==", "Student"),where("process", "==", 2),where("isAsigned2", "==", false)); 
+        const q = query(collection(db, "Users"), where("type", "==", "Student"),where("process", "==", 2),where("isAssigned2", "==", false)); 
         const querySnapshot = await getDocs(q); //process: 0 no file uploads, 1 all files uploaded, 2 preevaluated, 3 evaluated, 4 done       
         querySnapshot.forEach((doc) => {
           // doc.data() is never undefined for query doc snapshots

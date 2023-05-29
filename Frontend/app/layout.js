@@ -20,6 +20,7 @@ import firebase_app from '@/firebase/config';
 import Footer from '@/components/footer';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
+import Process from '@/components/process';
 
 
 
@@ -42,7 +43,6 @@ export default function RootLayout({ children }) {
   if(/\d/.test(path)) {
     path = path.substring(0,path.lastIndexOf("/"));
   }
-
 
     React.useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -92,6 +92,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body>
       <AuthContextProvider>
+        
       <div className="navbar fixed bg-menuvar-100 text-white z-50">
         <div className="navbar-start">
           <div className="dropdown">
@@ -117,48 +118,51 @@ export default function RootLayout({ children }) {
           </ul>
         </div>
         <div className="navbar-end">
-          <btn onClick={handleClick} className="btn hidden lg:flex">Log out</btn>
+        {path!="" &&(<btn onClick={handleClick} className="btn hidden lg:flex">Log out</btn>)}
 
         </div>
       </div>
           <div className='flex flex-row justify-center'>
 
-            {data?.type!="Student" && (<div className="top-16 hidden p-2 lg:block fixed flex flex-col w-64 h-full bg-menuvar-100 border-r-xl border-stone-700 text-center text-3xl text-white left-0">
+            <div className="top-16 hidden p-2 lg:block fixed flex flex-col w-64 h-full bg-menuvar-100 border-r-xl border-stone-700 text-center text-3xl text-white left-0 pt-8">
                     
-                {path=="Documents" && (<div className='flex flex-row p-3 rounded-2xl justify-center mb-1 items-center bg-menuvar-300 mx-5 transition-all mt-8'>
+                {(path=="Documents" && data?.type!="Student" && path!="")  && (<div className='flex flex-row p-3 rounded-2xl justify-center mb-1 items-center bg-menuvar-300 mx-5 transition-all'>
                         <MdFormatListBulleted/>
                         <h2 className=''><Link href='/documents'> Documents</Link></h2>
                     </div>)}
-                {path!="Documents" && (<div className='flex flex-row p-3 rounded-2xl justify-center mb-1 items-center hover:bg-menuvar-300 mx-5 transition-all mt-8'>
+                {path!="Documents" && data?.type!="Student"&& path!="" && (<div className='flex flex-row p-3 rounded-2xl justify-center mb-1 items-center hover:bg-menuvar-300 mx-5 transition-all'>
                         <MdFormatListBulleted/>
                         <h2 className=''><Link href='/documents'> Documents</Link></h2>
                     </div>)}
 
-                {path=="Profile" && (<div className='flex flex-row rounded-2xl justify-center p-3 items-center bg-menuvar-300 mx-5 transition-all'>
+                {path=="Profile"&& path!="" && (<div className='flex flex-row rounded-2xl justify-center p-3 items-center bg-menuvar-300 mx-5 transition-all'>
                         <MdAccountCircle/>
                         <h2 className=''><Link href="/profile"> Profile</Link></h2>
                     </div>)}
-                {path!="Profile" && (<div className='flex flex-row rounded-2xl justify-center p-3 items-center hover:bg-menuvar-300 mx-5 transition-all'>
+                {path!="Profile"&& path!="" && (<div className='flex flex-row rounded-2xl justify-center p-3 items-center hover:bg-menuvar-300 mx-5 transition-all'>
                         <MdAccountCircle/>
                         <h2 className=''><Link href="/profile"> Profile</Link></h2>
                     </div>)}
 
-                    <ul className='bg-menuvar-600 text-lg p-3 left-0 fixed bottom-0 h-64 flex flex-col w-64'>
+                    <div className='bg-menuvar-600 text-lg p-3 left-0 fixed bottom-0 h-64 flex flex-col w-64'>
+                    {path!="" &&(<ul>
                       <li>{data?.name}</li>
+                      <li>{data?.type}</li>
                       <li>{data?.email}</li>
-                      <li>Evaluated:</li>
-                      <li>Will Evaluate:</li>
-                    </ul>
+                      {data?.type == "Student" && (<li>
+                          <p>Evaluation Process: <Process process={data?.process}/></p> </li>)}
+                      {data?.type != "Student" && (<li>
+                          <p>Total Assigned Documents:{ data?.assigned_reports.length} </p></li>)}</ul>)}
+                    </div>
                     
                    
 
-                </div>)}
+                </div>
 
                
                 
-                {data?.type!="Student" && (<div className='w-full lg:w-5/6 lg:ml-64 border-menuvar-300 xl:border-2 xl:shadow-xl mt-16 pb-28'>{children}</div>)}
+                <div className='w-full lg:w-5/6 lg:ml-64 border-menuvar-300 xl:border-2 xl:shadow-xl mt-16 pb-64'>{children}</div>
 
-                {data?.type=="Student" && (<div className='w-full lg:w-4/6 border-menuvar-300 xl:border-2 xl:shadow-xl mt-16 pb-28'>{children}</div>)}
                
 
 

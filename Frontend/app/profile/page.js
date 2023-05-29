@@ -4,21 +4,28 @@ import { useAuthContext } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import Image from "next/image"
 import logOut from "@/firebase/auth/logout";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { storage } from "@/firebase/config";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import View from '@/components/view';
 import Process from '@/components/process';
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, getDocs,collection } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { getStorage } from "@firebase/storage";
 import autoAssign from "@/script/autoassign";
+import addReport from "@/script/addReport";
+import getSub from "@/script/getsub";
 
-
+//!url = url.length = 0 = data?.process =0
 export default function Profile() {
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [fileUploaded, setFileUploaded] = useState(false);
+    const [docdata,setDocdata] = useState()
+
+
     const { user } = useAuthContext()
     const router = useRouter()
-    const [url,setUrl] = useState()
+    const [url,setUrl] = useState([])
     const [data,setData] = useState()
     //Logout starts
     const handleClick = async (event) => {
@@ -46,23 +53,21 @@ export default function Profile() {
             const docSnap = await getDoc(docRef);  
             setData(docSnap.data())
         }
+        
         if(user!=null) {
             getData(user.uid)
-            const storage = getStorage();
-            const starsRef = ref(storage, '/files/'+user.uid);
-
-            // Get the download URL
-            getDownloadURL(starsRef)
-            .then((url) => {
-                // `url` is the download URL for 'images/stars.jpg'
-                //console.log(url)
-                setUrl(url)
+            getSub(setUrl,user.uid)
+            if(data?.type == "Student") {
                 
-            })
+                
+
+
+
+                }
+            
         }
         
     }, [])
-
 
     //Storage
     const [file, setFile] = useState("");
@@ -73,14 +78,22 @@ export default function Profile() {
     // Handle file upload event and update state
     function handleChange(event) {
         setFile(event.target.files[0]);
+    
+        setSelectedFile(file);
+
     }
+
+    
  
     const handleUpload = () => {
         if (!file) {
             alert("Please upload a file first!");
+            setFileUploaded(false);
         }
         else {
-        const storageRef = ref(storage, `/files/${user.uid}`);
+        const storageRef = ref(storage, `/files/${user.uid}/${(new Date()).getTime()}`);
+        
+        setFileUploaded(true);
  
         // progress can be paused and resumed. It also exposes progress updates.
         // Receives the storage reference and the file to upload.
@@ -89,8 +102,9 @@ export default function Profile() {
         uploadTask.on(
             "state_changed",
             (snapshot) => {
+                
                 const percent = Math.round(
-                    (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+                    (snapshot.bytesTransferred / snapshot.totalBytes) * 100
                 );
  
                 // update progress
@@ -100,56 +114,78 @@ export default function Profile() {
             () => {
                 // download url
                 getDownloadURL(uploadTask.snapshot.ref).then((url) => {
-                    setUrl(url)
+                    //const docRef = doc(db, "Users", user.uid, "Documents", user.uid);
+                    addReport(user.uid,url)
+                    getSub(setUrl,user.uid)
                 });
             }
         );
         autoAssign(user.uid)
         }
-
     };
-
-
-
-
-
 
     return (
       <>
         <div className="flex flex-col lg:flex-row justify-evenly items-center m-5 mb-20">
             <div className="avatar">
-                <div className="rounded bg-slate-400">
+                <div className="rounded">
                     <Image src="/images/bilkent_logo.png"
                         alt="Avatar"
-                        width={175}
-                        height={175}
+                        width={150}
+                        height={150}
                         priority />
+
                 </div>
             </div>
+
             <div className="flex flex-col">
-                <p>Student Name: {data?.name}</p>
-                <p>Internship Place:</p>
-                <div className="flex items-center">
+                <p>Name: {data?.name}</p>
+                <p>Role: {data?.type}</p>
+                {data?.type == "Student" && (<div className="flex items-center">
                     <p>Evaluation Process: </p>
                     <Process process={data?.process}/>
-                </div>
+                </div>)}
+                {data?.type != "Student" && (<div className="flex items-center">
+                    <p>Total Assigned Documents: </p>
+                    { data?.assigned_reports.length}
+                </div>)}
 
             </div>
         </div>
         
-        <div className="flex flex-col lg:flex-row justify-evenly items-center m-5">
-            <div className="flex flex-col items-center lg:w-1/2">
-                <p>Upload Internship Report</p>
-                <input type="file" onChange={handleChange} className="file-input file-input-bordered w-full max-w-xs" />
+        {data?.type=="Student" && (<div className="flex flex-col lg:flex-row justify-evenly items-center m-5">
+            { url.length > 0 && (<View url={url} setDocdata={setDocdata} type={data?.type}/>)}
+            <div className="flex flex-col items-center">
+            { url.length >0 && <p className="bg-green-600 p-3 text-white font-medium rounded-lg" >You already submitted your document</p>}
+            {url.length==0 && <p className="p-3 bg-red-500 text-white rounded-lg" >No file uploaded yet.</p>}
+                { !url && <p className="m-3">Upload Internship Report</p> }
                 <div>
-                    <button onClick={handleUpload} className="btn m-5">Confirm</button>
-                    <p>{percent} "% done"</p>
+                    {url.length==0 && <p className="m-2"> You can upload your document below </p>}
+                    {url.length>0 && <p className="m-2"> You can reupload your document below </p>}
+                    {url.length==0 &&<input type="file" onChange={handleChange} className="file-input file-input-bordered w-full max-w-xs" /> }
+                    {url.length>0 &&<input type="file" onChange={handleChange} className="file-input file-input-bordered w-full max-w-xs" /> }
                 </div>
-                
+
+                <div className="flex flex-col items-center">
+                    <button onClick={handleUpload} className="btn m-5">Confirm</button>
+                    { url.length==0 && percent!=0 && <p > %{percent} Done</p> }
+
+                    {(percent === 100) && fileUploaded && <div className="alert alert-success shadow-lg text-white bg-green-400">
+                                    <div>
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                        <span>File uploaded successfully</span>
+                                    </div>
+                                    </div>}
+                    
+                </div>
             </div>
-            <View url={url}/>
-        </div>
-        <btn onClick={handleClick} className="btn">Log out</btn>
+
+            
+                
+                
+        </div>)}
+
+        
       
       </>
     )
