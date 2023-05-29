@@ -66,7 +66,7 @@ export default function Evaluate({params}) {
                 process:value.process 
                 }); 
                 console.log(feed)
-                updateReport(params.evaluate,feed,"Teaching Assistant",docdata,value?.feedback)
+                updateReport(params.evaluate,feed,"Teaching Assistant",docdata,value?.feedback,value?.grade)
 
                 if(value.process==1) {
                     alert("Feedback Submitted") 
@@ -156,17 +156,17 @@ export default function Evaluate({params}) {
     return ( 
       <> 
       <div className="m-10 mb-0"> 
-            <p>Student Name:{data.name}</p> 
-            <p>Email:{data.email}</p> 
+            <p>Student Name:{data?.name}</p> 
+            <p>Email:{data?.email}</p> 
         </div> 
       <div className="flex flex-col lg:flex-row-reverse justify-around">  
  
         <div className=" flex flex-col items-center mt-10"> 
             {url && (<View url={url} setDocdata={setDocdata} type={type}/> )}
-            <div className="flex flex-col items-center my-5"> 
+            {data?.company != "" && (<div className="flex flex-col items-center my-5"> 
                 <p>Company Internship Report</p> 
-                <button className="btn m-2">View</button> 
-            </div> 
+                <button className="btn m-2"><a href={data?.company}>View</a></button> 
+            </div>)}
         </div> 
  
         {type?.type=="Evaluator" &&( 
@@ -175,12 +175,19 @@ export default function Evaluate({params}) {
                 <div> 
                     
                         </div> 
-                        <p>Finalization</p> 
+                        <p>Evaluate</p> 
 
                         <textarea {...register("feedback")} className="textarea textarea-bordered mt-5 bg-menuvar-200" cols={30} rows={10} placeholder="Final Comments"></textarea> 
+                        <div className="form-control mt-3">
+                            <label className="input-group">
+                                <span>Grade</span>
+                                <input {...register("grade")} className="input input-bordered w-14 pt-1 font-bold" >{data?.grade}</input>
+                                <span>/10</span>
+                            </label>
+                        </div>
                         <div className="flex flex-col justify-center items-center "> 
                             <p className="text-center items-center">Upload Feedback</p> 
-                            <input type="file" onChange={handleChange} className="file-input file-input-bordered w-full max-w-xs" /> 
+                            <input type="file" accept="application/pdf" onChange={handleChange} className="file-input file-input-bordered w-full max-w-xs" /> 
                             <div> 
                             <p className="text-center items-center"> {percent}% </p> 
                             {percent===100 &&( 
@@ -214,7 +221,7 @@ export default function Evaluate({params}) {
                         <textarea {...register("feedback")} className="textarea textarea-bordered mt-5 bg-menuvar-200" cols={30} rows={10} placeholder="Final Comments"></textarea> 
                         <div className="flex flex-col justify-center items-center "> 
                             <p className="text-center items-center">Upload Feedback</p> 
-                            <input type="file" onChange={handleChange} className="file-input file-input-bordered w-full max-w-xs" /> 
+                            <input type="file" accept="application/pdf" onChange={handleChange} className="file-input file-input-bordered w-full max-w-xs" /> 
                             <div> 
                             <p className="text-center items-center"> {percent}% </p> 
                             {percent===100 &&( 

@@ -36,7 +36,8 @@ export default function Auth() {
                 type:value.type,
                 uid:result.user.uid,
                 isAssigned:false,
-                isAssigned2:false
+                isAssigned2:false,
+                company:""
                 }
             const TA = {
                 name:value.name,

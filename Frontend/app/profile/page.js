@@ -162,8 +162,8 @@ export default function Profile() {
                 <div>
                     {url.length==0 && <p className="m-2"> You can upload your document below </p>}
                     {url.length>0 && <p className="m-2"> You can reupload your document below </p>}
-                    {url.length==0 &&<input type="file" onChange={handleChange} className="file-input file-input-bordered w-full max-w-xs" /> }
-                    {url.length>0 &&<input type="file" onChange={handleChange} className="file-input file-input-bordered w-full max-w-xs" /> }
+                    {url.length==0 &&<input type="file" accept="application/pdf" onChange={handleChange} className="file-input file-input-bordered w-full max-w-xs" /> }
+                    {url.length>0 &&<input type="file" accept="application/pdf" onChange={handleChange} className="file-input file-input-bordered w-full max-w-xs" /> }
                 </div>
 
                 <div className="flex flex-col items-center">

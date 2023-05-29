@@ -57,7 +57,8 @@ export default async function autoAssign(studentID) {
         const assignStudent = async () => {
           const docRef = doc(db, "Users", studentID);
           updateDoc(docRef, {
-            isAssigned: true
+            isAssigned: true,
+            process:2
             });
       }
 
