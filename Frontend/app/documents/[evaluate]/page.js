@@ -88,7 +88,7 @@ export default function Evaluate({params}) {
                 process:value.process 
                 }); 
                 console.log(feed)
-                updateReport(params.evaluate,feed,"Evaluator",docdata,value?.feedback)
+                updateReport(params.evaluate,feed,"Evaluator",docdata,value?.feedback,value?.grade)
 
                 if(value.process==2) {
                     alert("Feedback Submitted") 
@@ -100,6 +100,9 @@ export default function Evaluate({params}) {
                         assigned_reports: arrayRemove(params.evaluate),
                         process:3
                     });
+                    await updateDoc(ref, { 
+                        grade:value?.grade
+                        }); 
                     alert("Student Graded") 
                     router.push("/documents")
                 }

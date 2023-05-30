@@ -20,7 +20,7 @@ export default async function updateReport(studentID,url,type,file_id="",feedbac
 
         
 
-        updateCollection(url,studentID,type)
+        updateCollection(url,studentID)
         
 
    

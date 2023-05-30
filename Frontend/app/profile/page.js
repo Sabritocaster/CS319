@@ -9,18 +9,18 @@ import { storage } from "@/firebase/config";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import View from '@/components/view';
 import Process from '@/components/process';
-import { doc, getDoc, getDocs,collection } from "firebase/firestore";
+import { doc, getDoc, getDocs,collection, query ,where} from "firebase/firestore";
 import { db } from "@/firebase/config";
-import { getStorage } from "@firebase/storage";
 import autoAssign from "@/script/autoassign";
 import addReport from "@/script/addReport";
 import getSub from "@/script/getsub";
-
+import Done from "@/components/done";
 //!url = url.length = 0 = data?.process =0
 export default function Profile() {
     const [selectedFile, setSelectedFile] = useState(null);
     const [fileUploaded, setFileUploaded] = useState(false);
     const [docdata,setDocdata] = useState()
+    const [done, setDone] = useState([])
 
 
     const { user } = useAuthContext()
@@ -43,6 +43,8 @@ export default function Profile() {
     }
     //Logout Ends
 
+    
+
     React.useEffect(() => {
         if (user == null) router.push("/")
     }, [user])
@@ -57,17 +59,36 @@ export default function Profile() {
         if(user!=null) {
             getData(user.uid)
             getSub(setUrl,user.uid)
-            if(data?.type == "Student") {
-                
-                
-
-
-
-                }
             
         }
         
     }, [])
+
+    React.useEffect(() => {
+      
+        const getDone = async () => {
+            var docs = [];
+            //var q;
+    
+              const q = query(collection(db, "Users"), where("type", "==", "Student"),where("process", "==", 3))
+              const querySnapshot = await getDocs(q); //process: 0 no file uploads, 1 all files uploaded, 2 preevaluated, 3 evaluated, 4 done       
+              querySnapshot.forEach((doc) => {
+                // doc.data() is never undefined for query doc snapshots
+                docs.push(doc.data())
+              });
+              setDone(docs)
+              console.log(docs)
+            
+          }
+        
+        if(user!=null) {
+            if(data?.type == "Department Secretary") {               
+                getDone()
+                }
+            
+        }
+        
+    },[])
 
     //Storage
     const [file, setFile] = useState("");
@@ -123,7 +144,7 @@ export default function Profile() {
         autoAssign(user.uid)
         }
     };
-
+    console.log(done)
     return (
       <>
         <div className="flex flex-col lg:flex-row justify-evenly items-center m-5 mb-20">
@@ -184,6 +205,8 @@ export default function Profile() {
                 
                 
         </div>)}
+
+        {data?.type == "Department Secretary" &&(<Done/>)}
 
         
       
